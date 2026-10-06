@@ -1,0 +1,13 @@
+# Runtime dependencies. PyTorch is installed separately for your hardware (setup.ps1 / setup.sh do this).
+fastapi>=0.115
+uvicorn[standard]>=0.30
+python-multipart>=0.0.9
+pydantic-settings>=2.4
+openai>=1.40
+qdrant-client>=1.12
+rank-bm25>=0.2.2
+sentence-transformers>=3.0
+pymupdf>=1.24.3
+scipy<1.17  # pinned for Windows compatibility
+streamlit>=1.50
+requests>=2.32

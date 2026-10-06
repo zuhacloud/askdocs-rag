@@ -1,0 +1,20 @@
+# Environment and secrets
+.venv/
+.env
+
+# Python
+__pycache__/
+*.pyc
+.pytest_cache/
+.ruff_cache/
+
+# Local data: the vector index and uploaded files
+storage/
+data/*
+!data/.gitkeep
+
+# Generated evaluation questions (results.md is kept)
+eval/qa.jsonl
+
+# Personal study notes
+docs/*.pdf

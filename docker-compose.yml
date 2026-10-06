@@ -1,0 +1,49 @@
+# Three containers: the Qdrant database, the API, and the chat UI.
+# Start everything with: docker compose up --build
+services:
+  # Vector database as a real server (instead of the embedded on-disk mode used locally).
+  qdrant:
+    image: qdrant/qdrant:latest
+    ports: ["6333:6333"]
+    volumes: [qdrant_data:/qdrant/storage]  # named volume: the index survives container restarts
+
+  api:
+    build: .
+    image: askdocs:latest  # one image shared by the api and ui services
+    env_file:
+      - path: .env
+        required: false  # start even if there's no .env
+    environment:
+      # Inside Docker, "qdrant" is the database container's hostname.
+      QDRANT_URL: http://qdrant:6333
+      # "localhost" inside a container means the container itself, so reach Ollama on the host
+      # machine through host.docker.internal. Override with DOCKER_LLM_BASE_URL for a hosted LLM.
+      LLM_BASE_URL: ${DOCKER_LLM_BASE_URL:-http://host.docker.internal:11434/v1}
+    extra_hosts: ["host.docker.internal:host-gateway"]  # makes host.docker.internal work on Linux too
+    ports: ["8000:8000"]
+    volumes:
+      - hf_cache:/root/.cache/huggingface  # keep downloaded models between rebuilds
+      - ./data:/app/data  # uploaded files
+    depends_on: [qdrant]
+    # "Healthy" once /health answers, i.e. the models have loaded (the first start also downloads them).
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/health')"]
+      interval: 10s
+      timeout: 5s
+      start_period: 30s
+      retries: 60
+
+  ui:
+    build: .
+    image: askdocs:latest  # same image as the API, different start command
+    command: python -m streamlit run app/streamlit_app.py --server.port 8501 --server.address 0.0.0.0 --server.headless true
+    environment:
+      API_URL: http://api:8000  # the API container's hostname
+    ports: ["8501:8501"]
+    depends_on:
+      api:
+        condition: service_healthy  # wait until the API has loaded its models
+
+volumes:
+  qdrant_data:
+  hf_cache:

@@ -1,0 +1,9 @@
+.venv/
+.git/
+**/__pycache__/
+.pytest_cache/
+.env
+storage/
+data/
+docs/
+eval/qa.jsonl

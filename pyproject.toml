@@ -1,0 +1,18 @@
+[project]
+name = "askdocs"
+version = "0.2.0"
+description = "Chat with your documents: hybrid retrieval, reranking and cited answers."
+requires-python = ">=3.10"
+
+[tool.pytest.ini_options]
+pythonpath = ["."]
+testpaths = ["tests"]
+
+[tool.ruff]
+line-length = 120
+target-version = "py310"
+
+[tool.ruff.lint]
+# pycodestyle, pyflakes, import order, bugbear, pyupgrade
+select = ["E", "W", "F", "I", "B", "UP"]
+ignore = ["B008"]  # FastAPI's `files = File(...)` default is the framework's documented pattern
